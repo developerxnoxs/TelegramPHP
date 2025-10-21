@@ -1,0 +1,30 @@
+modules = ["python-3.11", "php-8.2"]
+[agent]
+expertMode = true
+
+[nix]
+channel = "stable-25_05"
+packages = ["openssl"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Real Auth Test"
+
+[[workflows.workflow]]
+name = "Real Auth Test"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "php test_real_auth.php"
+
+[workflows.workflow.metadata]
+outputType = "console"

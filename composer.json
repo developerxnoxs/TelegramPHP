@@ -1,0 +1,21 @@
+{
+    "name": "custom/telethon-php",
+    "description": "PHP implementation of Telegram MTProto protocol inspired by Telethon",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "TelethonPHP\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=8.2",
+        "ext-openssl": "*",
+        "ext-mbstring": "*",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-gmp": "*"
+    },
+    "require-dev": {},
+    "minimum-stability": "stable"
+}
