@@ -6,6 +6,7 @@ use TelethonPHP\Sessions\AbstractSession;
 use TelethonPHP\Sessions\MemorySession;
 use TelethonPHP\Network\Connection;
 use TelethonPHP\Network\Authenticator;
+use TelethonPHP\Network\MTProtoSender;
 use TelethonPHP\Crypto\RSA;
 use TelethonPHP\Crypto\AuthKey;
 
@@ -16,6 +17,8 @@ class TelegramClient
     private AbstractSession $session;
     private ?Connection $connection = null;
     private ?Auth $auth = null;
+    private ?MTProtoSender $sender = null;
+    private int $timeOffset = 0;
     
     private const DC_OPTIONS = [
         1 => ['ip' => '149.154.175.53', 'port' => 443],
@@ -54,10 +57,14 @@ class TelegramClient
             $authenticator = new Authenticator($this->connection);
             $authKey = $authenticator->doAuthentication();
             $this->session->setAuthKey($authKey->getKey());
+            $this->timeOffset = $authenticator->getTimeOffset();
             echo "[Client] Auth key generated and saved!\n";
         } else {
             echo "[Client] Using existing auth key\n";
         }
+        
+        $authKeyObj = new AuthKey($this->session->getAuthKey());
+        $this->sender = new MTProtoSender($this->connection, $authKeyObj, $this->timeOffset);
     }
 
     public function start(string $phone = '', callable $codeCallback = null): void
@@ -84,7 +91,8 @@ class TelegramClient
             
             $user = $this->auth->signIn($phone, $sentCode['phone_code_hash'], $code);
             
-            echo "[Client] Welcome, {$user['user']['first_name']}!\n";
+            $firstName = $user['user']['first_name'] ?? 'User';
+            echo "[Client] Welcome, {$firstName}!\n";
         } else {
             echo "[Client] Already authorized\n";
         }
@@ -144,5 +152,20 @@ class TelegramClient
     public function getAuth(): Auth
     {
         return $this->auth;
+    }
+
+    public function getSender(): ?MTProtoSender
+    {
+        return $this->sender;
+    }
+
+    public function getApiId(): int
+    {
+        return $this->apiId;
+    }
+
+    public function getApiHash(): string
+    {
+        return $this->apiHash;
     }
 }

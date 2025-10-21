@@ -16,10 +16,10 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Real Auth Test"
+args = "Auth Test"
 
 [[workflows.workflow]]
-name = "Real Auth Test"
+name = "Auth Test"
 author = "agent"
 
 [[workflows.workflow.tasks]]

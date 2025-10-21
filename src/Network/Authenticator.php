@@ -23,12 +23,25 @@ use TelethonPHP\TL\Functions\SetClientDHParamsRequest;
 class Authenticator
 {
     private MTProtoPlainSender $sender;
+    private int $timeOffset = 0;
 
-    public function __construct(string $ip, int $port)
+    public function __construct($ipOrConnection, ?int $port = null)
     {
-        $connection = new TcpAbridged($ip, $port);
-        $this->sender = new MTProtoPlainSender($connection);
+        if ($ipOrConnection instanceof Connection) {
+            $transport = $ipOrConnection;
+        } elseif (is_string($ipOrConnection) && $port !== null) {
+            $transport = new TcpAbridged($ipOrConnection, $port);
+        } else {
+            throw new \InvalidArgumentException('Invalid constructor arguments');
+        }
+        
+        $this->sender = new MTProtoPlainSender($transport);
         RSA::initDefaultKeys();
+    }
+    
+    public function getTimeOffset(): int
+    {
+        return $this->timeOffset;
     }
 
     public function doAuthentication(): AuthKey
@@ -186,10 +199,10 @@ class Authenticator
         $dhPrime = Helpers::getInt($serverDHInner->dhPrime, false);
         $g = gmp_init($serverDHInner->g);
         $gA = Helpers::getInt($serverDHInner->gA, false);
-        $timeOffset = $serverDHInner->serverTime - time();
+        $this->timeOffset = $serverDHInner->serverTime - time();
         
         echo "[Auth] g = " . gmp_strval($g) . "\n";
-        echo "[Auth] time_offset = " . $timeOffset . " seconds\n";
+        echo "[Auth] time_offset = " . $this->timeOffset . " seconds\n";
         
         // Generate random b (256 bytes)
         $b = Helpers::getInt(Helpers::generateRandomBytes(256), false);
@@ -271,7 +284,7 @@ class Authenticator
             echo "==============================================\n\n";
             echo "Successfully generated auth_key!\n";
             echo "Auth Key ID: " . bin2hex($authKey->getKeyId()) . "\n";
-            echo "Time offset: {$timeOffset} seconds\n\n";
+            echo "Time offset: {$this->timeOffset} seconds\n\n";
             
             return $authKey;
             
