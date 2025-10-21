@@ -53,4 +53,26 @@ class InitConnectionRequest extends TLObject
         $writer->writeString($this->langCode);
         $this->query->serialize($writer);
     }
+
+    public function toDict(): array
+    {
+        return [
+            '_' => 'initConnection',
+            'api_id' => $this->apiId,
+            'device_model' => $this->deviceModel,
+            'system_version' => $this->systemVersion,
+            'app_version' => $this->appVersion,
+            'system_lang_code' => $this->systemLangCode,
+            'lang_pack' => $this->langPack,
+            'lang_code' => $this->langCode,
+            'query' => $this->query->toDict()
+        ];
+    }
+
+    public function toBytes(): string
+    {
+        $writer = new BinaryWriter();
+        $this->serialize($writer);
+        return $writer->getValue();
+    }
 }

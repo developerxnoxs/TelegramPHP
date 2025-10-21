@@ -24,4 +24,20 @@ class InvokeWithLayerRequest extends TLObject
         $writer->writeInt($this->layer);
         $this->query->serialize($writer);
     }
+
+    public function toDict(): array
+    {
+        return [
+            '_' => 'invokeWithLayer',
+            'layer' => $this->layer,
+            'query' => $this->query->toDict()
+        ];
+    }
+
+    public function toBytes(): string
+    {
+        $writer = new BinaryWriter();
+        $this->serialize($writer);
+        return $writer->getValue();
+    }
 }

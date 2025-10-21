@@ -4,6 +4,8 @@ namespace TelethonPHP\Client;
 
 use TelethonPHP\TL\Functions\AuthSendCodeRequest;
 use TelethonPHP\TL\Functions\AuthSignInRequest;
+use TelethonPHP\TL\Functions\InvokeWithLayerRequest;
+use TelethonPHP\TL\Functions\InitConnectionRequest;
 use TelethonPHP\TL\Types\AuthSentCode;
 use TelethonPHP\TL\Types\AuthAuthorization;
 use TelethonPHP\TL\BinaryReader;
@@ -40,6 +42,26 @@ class Auth
             $this->client->getApiId(),
             $this->client->getApiHash()
         );
+
+        if ($this->client->isFirstRequest()) {
+            echo "[Auth] Wrapping with initConnection + invokeWithLayer (first request)\n";
+            
+            $request = new InvokeWithLayerRequest(
+                214,
+                new InitConnectionRequest(
+                    $this->client->getApiId(),
+                    'TelethonPHP',
+                    php_uname('s') . ' ' . php_uname('r'),
+                    '1.0.0',
+                    'en',
+                    '',
+                    'en',
+                    $request
+                )
+            );
+            
+            $this->client->markFirstRequestSent();
+        }
 
         try {
             $response = $sender->send($request);

@@ -19,6 +19,7 @@ class TelegramClient
     private ?Auth $auth = null;
     private ?MTProtoSender $sender = null;
     private int $timeOffset = 0;
+    private bool $isFirstRequest = true;
     
     private const DC_OPTIONS = [
         1 => ['ip' => '149.154.175.53', 'port' => 443],
@@ -167,5 +168,15 @@ class TelegramClient
     public function getApiHash(): string
     {
         return $this->apiHash;
+    }
+
+    public function isFirstRequest(): bool
+    {
+        return $this->isFirstRequest;
+    }
+
+    public function markFirstRequestSent(): void
+    {
+        $this->isFirstRequest = false;
     }
 }
