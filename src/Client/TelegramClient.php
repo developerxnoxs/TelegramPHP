@@ -39,10 +39,15 @@ class TelegramClient
         $this->auth = new Auth($this);
     }
 
-    public function connect(int $dcId = 2): void
+    public function connect(int $dcId = 2, bool $isReconnect = false): void
     {
         if (!isset(self::DC_OPTIONS[$dcId])) {
             throw new \InvalidArgumentException("Invalid DC ID: $dcId");
+        }
+        
+        if ($isReconnect && $this->connection) {
+            echo "[Client] Disconnecting from current DC...\n";
+            $this->connection->close();
         }
         
         $dc = self::DC_OPTIONS[$dcId];
@@ -53,8 +58,13 @@ class TelegramClient
         
         echo "[Client] Connected to DC $dcId ({$dc['ip']}:{$dc['port']})\n";
         
-        if ($this->session->getAuthKey() === null) {
-            echo "[Client] No auth key found, generating new one...\n";
+        if ($this->session->getAuthKey() === null || $isReconnect) {
+            if ($isReconnect) {
+                echo "[Client] Generating new auth key for DC $dcId...\n";
+            } else {
+                echo "[Client] No auth key found, generating new one...\n";
+            }
+            
             $authenticator = new Authenticator($this->connection);
             $authKey = $authenticator->doAuthentication();
             $this->session->setAuthKey($authKey->getKey());
@@ -66,6 +76,10 @@ class TelegramClient
         
         $authKeyObj = new AuthKey($this->session->getAuthKey());
         $this->sender = new MTProtoSender($this->connection, $authKeyObj, $this->timeOffset);
+        
+        if ($isReconnect) {
+            $this->isFirstRequest = true;
+        }
     }
 
     public function start(string $phone = '', callable $codeCallback = null): void

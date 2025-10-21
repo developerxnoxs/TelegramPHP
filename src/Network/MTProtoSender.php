@@ -129,7 +129,11 @@ class MTProtoSender
                 $errorMessage = $plaintextReader->readString();
                 
                 echo "[MTProto] RPC Error $errorCode: $errorMessage\n";
-                throw new \RuntimeException("RPC Error $errorCode: $errorMessage");
+                
+                $exception = new \RuntimeException("RPC Error $errorCode: $errorMessage");
+                $exception->errorCode = $errorCode;
+                $exception->errorMessage = $errorMessage;
+                throw $exception;
             }
             
             return [
