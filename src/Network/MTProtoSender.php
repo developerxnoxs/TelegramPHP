@@ -22,51 +22,74 @@ class MTProtoSender
     {
         $this->connection = $connection;
         $this->authKey = $authKey;
-        $this->sessionId = hexdec(bin2hex(random_bytes(8)));
+        $this->sessionId = unpack('P', random_bytes(8))[1];
         $this->timeOffset = $timeOffset;
-        $this->salt = hexdec(bin2hex(random_bytes(8)));
+        $this->salt = unpack('P', random_bytes(8))[1];
     }
 
     public function send($request): array
     {
-        $msgId = $this->getNewMsgId();
-        $seqNo = $this->getSeqNo(true);
+        $maxRetries = 5;
+        $attempt = 0;
         
-        $bodyWriter = new BinaryWriter();
-        $request->serialize($bodyWriter);
-        $body = $bodyWriter->getValue();
-        
-        $writer = new BinaryWriter();
-        $writer->writeLong($this->salt);
-        $writer->writeLong($this->sessionId);
-        $writer->writeLong($msgId);
-        $writer->writeInt($seqNo);
-        $writer->writeInt(strlen($body));
-        $writer->write($body);
-        
-        $plaintext = $writer->getValue();
-        
-        $paddingLength = (16 - (strlen($plaintext) % 16)) % 16;
-        if ($paddingLength < 12) {
-            $paddingLength += 16;
+        while ($attempt < $maxRetries) {
+            $msgId = $this->getNewMsgId();
+            $seqNo = $this->getSeqNo(true);
+            
+            $bodyWriter = new BinaryWriter();
+            $request->serialize($bodyWriter);
+            $body = $bodyWriter->getValue();
+            
+            $writer = new BinaryWriter();
+            $writer->writeLong($this->salt);
+            $writer->writeLong($this->sessionId);
+            $writer->writeLong($msgId);
+            $writer->writeInt($seqNo);
+            $writer->writeInt(strlen($body));
+            $writer->write($body);
+            
+            $plaintext = $writer->getValue();
+            
+            $paddingLength = (16 - (strlen($plaintext) % 16)) % 16;
+            if ($paddingLength < 12) {
+                $paddingLength += 16;
+            }
+            $plaintext .= random_bytes($paddingLength);
+            
+            $msgKeyLarge = hash('sha256', substr($this->authKey->getKey(), 88, 32) . $plaintext, true);
+            $msgKey = substr($msgKeyLarge, 8, 16);
+            
+            $encrypted = $this->aesCalculate($plaintext, $msgKey, true);
+            
+            $packet = new BinaryWriter();
+            $packet->write($this->authKey->getKeyId());
+            $packet->write($msgKey);
+            $packet->write($encrypted);
+            
+            $this->connection->send($packet->getValue());
+            
+            $response = $this->connection->recv();
+            
+            $result = $this->processResponse($response);
+            
+            if ($result['constructor'] === 0xedab447b) {
+                $badMsgId = $result['reader']->readLong();
+                $badMsgSeqNo = $result['reader']->readInt();
+                $errorCode = $result['reader']->readInt();
+                $newServerSalt = $result['reader']->readLong();
+                
+                echo "[MTProto] ⚠️  bad_server_salt received (error $errorCode)\n";
+                echo "[MTProto] Updating salt: " . dechex($this->salt) . " -> " . dechex($newServerSalt) . "\n";
+                
+                $this->salt = $newServerSalt;
+                $attempt++;
+                continue;
+            }
+            
+            return $result;
         }
-        $plaintext .= random_bytes($paddingLength);
         
-        $msgKeyLarge = hash('sha256', substr($this->authKey->getKey(), 88, 32) . $plaintext, true);
-        $msgKey = substr($msgKeyLarge, 8, 16);
-        
-        $encrypted = $this->aesCalculate($plaintext, $msgKey, true);
-        
-        $packet = new BinaryWriter();
-        $packet->write($this->authKey->getKeyId());
-        $packet->write($msgKey);
-        $packet->write($encrypted);
-        
-        $this->connection->send($packet->getValue());
-        
-        $response = $this->connection->recv();
-        
-        return $this->processResponse($response);
+        throw new \RuntimeException('Max retries exceeded for bad_server_salt');
     }
 
     private function processResponse(string $response): array
@@ -96,6 +119,69 @@ class MTProtoSender
         $length = $plaintextReader->readInt();
         
         $constructor = $plaintextReader->readInt();
+        
+        if ($constructor === 0xf35c6d01) {
+            $reqMsgId = $plaintextReader->readLong();
+            $resultConstructor = $plaintextReader->readInt();
+            
+            if ($resultConstructor === 0x2144ca19) {
+                $errorCode = $plaintextReader->readInt();
+                $errorMessage = $plaintextReader->readString();
+                
+                echo "[MTProto] RPC Error $errorCode: $errorMessage\n";
+                throw new \RuntimeException("RPC Error $errorCode: $errorMessage");
+            }
+            
+            return [
+                'constructor' => $resultConstructor,
+                'reader' => $plaintextReader,
+                'msg_id' => $msgId,
+                'req_msg_id' => $reqMsgId,
+                'length' => $length
+            ];
+        }
+        
+        if ($constructor === 0x73f1f8dc) {
+            $containerSize = $plaintextReader->readInt();
+            echo "[MTProto] msg_container with $containerSize messages\n";
+            
+            for ($i = 0; $i < $containerSize; $i++) {
+                $innerMsgId = $plaintextReader->readLong();
+                $innerSeqNo = $plaintextReader->readInt();
+                $innerBytes = $plaintextReader->readInt();
+                
+                $innerConstructor = $plaintextReader->readInt();
+                echo "[MTProto] Message $i: constructor=0x" . dechex($innerConstructor) . ", bytes=$innerBytes\n";
+                
+                if ($innerConstructor === 0xf35c6d01) {
+                    $reqMsgId = $plaintextReader->readLong();
+                    $resultConstructor = $plaintextReader->readInt();
+                    
+                    return [
+                        'constructor' => $resultConstructor,
+                        'reader' => $plaintextReader,
+                        'msg_id' => $innerMsgId,
+                        'req_msg_id' => $reqMsgId,
+                        'length' => $innerBytes - 12
+                    ];
+                }
+                
+                if ($innerConstructor === 0x9ec20908) {
+                    $firstMsgId = $plaintextReader->readLong();
+                    $uniqueId = $plaintextReader->readLong();
+                    $serverSalt = $plaintextReader->readLong();
+                    
+                    echo "[MTProto] new_session_created: updating salt to 0x" . dechex($serverSalt) . "\n";
+                    $this->salt = $serverSalt;
+                } else {
+                    $plaintextReader->read($innerBytes - 4);
+                }
+            }
+            
+            echo "[MTProto] Container processed, receiving next packet...\n";
+            $nextResponse = $this->connection->recv();
+            return $this->processResponse($nextResponse);
+        }
         
         return [
             'constructor' => $constructor,

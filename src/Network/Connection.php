@@ -40,4 +40,9 @@ class Connection
     {
         return $this->transport !== null;
     }
+
+    public function getTransport(): TcpAbridged
+    {
+        return $this->transport;
+    }
 }

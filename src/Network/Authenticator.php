@@ -28,7 +28,7 @@ class Authenticator
     public function __construct($ipOrConnection, ?int $port = null)
     {
         if ($ipOrConnection instanceof Connection) {
-            $transport = $ipOrConnection;
+            $transport = $ipOrConnection->getTransport();
         } elseif (is_string($ipOrConnection) && $port !== null) {
             $transport = new TcpAbridged($ipOrConnection, $port);
         } else {
