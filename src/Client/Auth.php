@@ -88,23 +88,23 @@ class Auth
                 'phone_code_hash' => $sentCode->phoneCodeHash,
                 'type' => $sentCode->type
             ];
-        } catch (\RuntimeException $e) {
-            if (isset($e->errorCode) && $e->errorCode === 303) {
+        } catch (\TelethonPHP\Exceptions\RPCException $e) {
+            if ($e->errorCode === 303) {
                 if (preg_match('/(PHONE|USER|NETWORK)_MIGRATE_(\d+)/', $e->errorMessage, $matches)) {
                     $newDc = (int)$matches[2];
-                    echo "[Auth] 🔄 DC Migration required: switching from current DC to DC $newDc\n";
+                    echo "[Auth] 🔄 DC Migration: switching to DC $newDc\n";
                     
                     $this->client->connect($newDc, true);
                     
-                    echo "[Auth] Retrying sendCode to $phoneNumber on DC $newDc...\n";
+                    echo "[Auth] Retrying sendCode on DC $newDc...\n";
                     return $this->sendCode($phoneNumber);
                 }
             }
             
-            echo "[Auth] ❌ Error sending code: " . $e->getMessage() . "\n";
+            echo "[Auth] ❌ Error: " . $e->getMessage() . "\n";
             throw $e;
         } catch (\Exception $e) {
-            echo "[Auth] ❌ Error sending code: " . $e->getMessage() . "\n";
+            echo "[Auth] ❌ Error: " . $e->getMessage() . "\n";
             throw $e;
         }
     }

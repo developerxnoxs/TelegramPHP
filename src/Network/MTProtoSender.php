@@ -7,6 +7,7 @@ use TelethonPHP\Crypto\AuthKey;
 use TelethonPHP\TL\BinaryWriter;
 use TelethonPHP\TL\BinaryReader;
 use TelethonPHP\Helpers\Helpers;
+use TelethonPHP\Exceptions\RPCException;
 
 class MTProtoSender
 {
@@ -129,11 +130,7 @@ class MTProtoSender
                 $errorMessage = $plaintextReader->readString();
                 
                 echo "[MTProto] RPC Error $errorCode: $errorMessage\n";
-                
-                $exception = new \RuntimeException("RPC Error $errorCode: $errorMessage");
-                $exception->errorCode = $errorCode;
-                $exception->errorMessage = $errorMessage;
-                throw $exception;
+                throw new RPCException($errorCode, $errorMessage);
             }
             
             return [
