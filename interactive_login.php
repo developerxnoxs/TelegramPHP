@@ -11,6 +11,8 @@ echo "║        TelethonPHP - Interactive Telegram Login               ║\n";
 echo "╚════════════════════════════════════════════════════════════════╝\n";
 echo "\n";
 
+$sessionFile = 'my_session.json';
+
 echo "📝 Anda memerlukan API credentials dari https://my.telegram.org/apps\n\n";
 
 echo "Masukkan API ID Anda: ";
@@ -18,6 +20,39 @@ $apiId = (int)trim(fgets(STDIN));
 
 echo "Masukkan API Hash Anda: ";
 $apiHash = trim(fgets(STDIN));
+
+// Check if session file exists
+if (file_exists($sessionFile)) {
+    echo "\n🔍 Session file ditemukan! Mencoba menggunakan session yang ada...\n";
+    
+    try {
+        $session = new FileSession($sessionFile);
+        $client = new TelegramClient($apiId, $apiHash, $session);
+        
+        echo "\n" . str_repeat("=", 64) . "\n";
+        echo "🔌 Connecting to Telegram...\n";
+        echo str_repeat("=", 64) . "\n\n";
+        
+        $client->connect();
+        
+        if ($client->getAuth()->isAuthorized()) {
+            echo "\n" . str_repeat("=", 64) . "\n";
+            echo "✅ SUDAH LOGIN!\n";
+            echo str_repeat("=", 64) . "\n\n";
+            echo "🎉 Anda sudah login menggunakan session yang tersimpan.\n";
+            echo "💡 Session Anda masih aktif, tidak perlu login ulang.\n\n";
+            
+            $client->disconnect();
+            exit(0);
+        } else {
+            echo "⚠️  Session tidak valid atau sudah expired.\n";
+            echo "📱 Melanjutkan proses login ulang...\n\n";
+        }
+    } catch (\Exception $e) {
+        echo "⚠️  Error menggunakan session lama: " . $e->getMessage() . "\n";
+        echo "📱 Melanjutkan proses login ulang...\n\n";
+    }
+}
 
 echo "Masukkan nomor telepon Anda (dengan kode negara, contoh: +628123456789): ";
 $phoneNumber = trim(fgets(STDIN));
@@ -27,7 +62,7 @@ echo "🚀 Memulai koneksi ke Telegram...\n";
 echo str_repeat("=", 64) . "\n\n";
 
 try {
-    $session = new FileSession('my_session.json');
+    $session = new FileSession($sessionFile);
     $client = new TelegramClient($apiId, $apiHash, $session);
     
     echo "🔌 Connecting to Telegram...\n";
