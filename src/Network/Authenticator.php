@@ -46,12 +46,7 @@ class Authenticator
 
     public function doAuthentication(): AuthKey
     {
-        echo "[Auth] Starting MTProto authentication...\n\n";
-        
-        // Step 1: Send req_pq_multi
         $nonce = Helpers::generateRandomBytes(16);
-        echo "[Auth] Step 1: Sending req_pq_multi\n";
-        echo "[Auth] nonce: " . bin2hex($nonce) . "\n";
         
         $reqPq = new ReqPqMultiRequest($nonce);
         $reqPqBytes = $reqPq->toBytes();
@@ -69,30 +64,19 @@ class Authenticator
         }
         
         $resPq = ResPQ::fromReader($reader);
-        echo "[Auth] ✅ Received ResPQ from Telegram!\n\n";
         
-        // Step 2: Validate nonces
         if ($resPq->nonce !== $nonce) {
             throw new \RuntimeException('Nonce mismatch in ResPQ');
         }
-        echo "[Auth] ✅ Nonce validated\n";
-        echo "[Auth] server_nonce: " . bin2hex($resPq->serverNonce) . "\n\n";
         
-        // Step 3: Factorize PQ
         $pqInt = Helpers::getInt($resPq->pq);
-        echo "[Auth] Step 2: Factorizing PQ\n";
-        echo "[Auth] PQ = " . gmp_strval($pqInt) . "\n";
         
         [$p, $q] = Helpers::factorize($pqInt);
-        echo "[Auth] ✅ Factorized: p=$p, q=$q\n\n";
         
         $pBytes = Helpers::getByteArray(gmp_init($p));
         $qBytes = Helpers::getByteArray(gmp_init($q));
         
-        // Step 4: Prepare p_q_inner_data and encrypt with RSA
         $newNonce = Helpers::generateRandomBytes(32);
-        echo "[Auth] Step 3: Preparing p_q_inner_data\n";
-        echo "[Auth] new_nonce: " . bin2hex(substr($newNonce, 0, 16)) . "...\n";
         
         $pqInnerData = new PQInnerData(
             $resPq->pq,
@@ -105,7 +89,6 @@ class Authenticator
         
         $pqInnerBytes = $pqInnerData->toBytes();
         
-        echo "[Auth] Encrypting with RSA...\n";
         $cipherText = null;
         $targetFingerprint = null;
         
@@ -113,7 +96,6 @@ class Authenticator
             $cipherText = RSA::encrypt($fingerprint, $pqInnerBytes, false);
             if ($cipherText !== null) {
                 $targetFingerprint = $fingerprint;
-                echo "[Auth] ✅ Found matching key: " . sprintf('0x%016x', $fingerprint) . "\n\n";
                 break;
             }
         }
@@ -123,7 +105,6 @@ class Authenticator
                 $cipherText = RSA::encrypt($fingerprint, $pqInnerBytes, true);
                 if ($cipherText !== null) {
                     $targetFingerprint = $fingerprint;
-                    echo "[Auth] ✅ Found matching OLD key: " . sprintf('0x%016x', $fingerprint) . "\n\n";
                     break;
                 }
             }
@@ -133,8 +114,6 @@ class Authenticator
             throw new \RuntimeException('No matching RSA key found');
         }
         
-        // Step 5: Send req_DH_params
-        echo "[Auth] Step 4: Sending req_DH_params\n";
         $reqDHParams = new ReqDHParamsRequest(
             $resPq->nonce,
             $resPq->serverNonce,
@@ -156,8 +135,6 @@ class Authenticator
             throw new \RuntimeException('Expected ServerDHParamsOk');
         }
         
-        echo "[Auth] ✅ Received ServerDHParamsOk\n\n";
-        
         if ($serverDHParams->nonce !== $resPq->nonce) {
             throw new \RuntimeException('Nonce mismatch in ServerDHParams');
         }
@@ -166,8 +143,6 @@ class Authenticator
             throw new \RuntimeException('Server nonce mismatch in ServerDHParams');
         }
         
-        // Step 6: Decrypt server_DH_inner_data
-        echo "[Auth] Step 5: Decrypting server_DH_inner_data\n";
         [$key, $iv] = Helpers::generateKeyDataFromNonce($resPq->serverNonce, $newNonce);
         
         if (strlen($serverDHParams->encryptedAnswer) % 16 !== 0) {
@@ -184,8 +159,6 @@ class Authenticator
             throw new \RuntimeException('Expected ServerDHInnerData');
         }
         
-        echo "[Auth] ✅ Decrypted and parsed ServerDHInnerData\n\n";
-        
         if ($serverDHInner->nonce !== $resPq->nonce) {
             throw new \RuntimeException('Nonce mismatch in ServerDHInnerData');
         }
@@ -194,22 +167,15 @@ class Authenticator
             throw new \RuntimeException('Server nonce mismatch in ServerDHInnerData');
         }
         
-        // Step 7: Complete DH exchange
-        echo "[Auth] Step 6: Computing DH key exchange\n";
         $dhPrime = Helpers::getInt($serverDHInner->dhPrime, false);
         $g = gmp_init($serverDHInner->g);
         $gA = Helpers::getInt($serverDHInner->gA, false);
         $this->timeOffset = $serverDHInner->serverTime - time();
         
-        echo "[Auth] g = " . gmp_strval($g) . "\n";
-        echo "[Auth] time_offset = " . $this->timeOffset . " seconds\n";
-        
-        // Generate random b (256 bytes)
         $b = Helpers::getInt(Helpers::generateRandomBytes(256), false);
         $gB = gmp_powm($g, $b, $dhPrime);
         $gab = gmp_powm($gA, $b, $dhPrime);
         
-        // Security checks
         $one = gmp_init(1);
         $dhPrimeMinusOne = gmp_sub($dhPrime, $one);
         
@@ -234,10 +200,6 @@ class Authenticator
             throw new \RuntimeException('g_b is not within safety range');
         }
         
-        echo "[Auth] ✅ DH security checks passed\n\n";
-        
-        // Step 8: Send set_client_DH_params
-        echo "[Auth] Step 7: Sending set_client_DH_params\n";
         $clientDHInner = new ClientDHInnerData(
             $resPq->nonce,
             $resPq->serverNonce,
@@ -260,9 +222,6 @@ class Authenticator
         $reader = new BinaryReader($response['data']);
         $dhGen = $reader->readObject();
         
-        echo "[Auth] ✅ Received DH generation result\n\n";
-        
-        // Step 9: Validate result
         if ($dhGen->nonce !== $resPq->nonce) {
             throw new \RuntimeException('Nonce mismatch in DH result');
         }
@@ -278,13 +237,6 @@ class Authenticator
             if ($dhGen->newNonceHash1 !== $newNonceHash) {
                 throw new \RuntimeException('New nonce hash mismatch');
             }
-            
-            echo "==============================================\n";
-            echo "✅ AUTHENTICATION COMPLETE!\n";
-            echo "==============================================\n\n";
-            echo "Successfully generated auth_key!\n";
-            echo "Auth Key ID: " . bin2hex($authKey->getKeyId()) . "\n";
-            echo "Time offset: {$this->timeOffset} seconds\n\n";
             
             return $authKey;
             

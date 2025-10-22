@@ -34,8 +34,6 @@ class Auth
         }
 
         $this->phoneNumber = $phoneNumber;
-
-        echo "[Auth] Sending code to $phoneNumber...\n";
         
         $request = new AuthSendCodeRequest(
             $phoneNumber,
@@ -44,8 +42,6 @@ class Auth
         );
 
         if ($this->client->isFirstRequest()) {
-            echo "[Auth] Wrapping with initConnection + invokeWithLayer (first request)\n";
-            
             $request = new InvokeWithLayerRequest(
                 214,
                 new InitConnectionRequest(
@@ -76,12 +72,6 @@ class Auth
             $sentCode = AuthSentCode::fromReader($response['reader']);
             
             $this->phoneCodeHash = $sentCode->phoneCodeHash;
-
-            echo "[Auth] ✅ Code sent! Check your Telegram app or SMS\n";
-            echo "[Auth] Code type: 0x" . dechex($sentCode->type['_constructor']) . "\n";
-            if ($sentCode->timeout) {
-                echo "[Auth] Timeout: {$sentCode->timeout} seconds\n";
-            }
             
             return [
                 'phone_number' => $phoneNumber,
@@ -92,19 +82,15 @@ class Auth
             if ($e->errorCode === 303) {
                 if (preg_match('/(PHONE|USER|NETWORK)_MIGRATE_(\d+)/', $e->errorMessage, $matches)) {
                     $newDc = (int)$matches[2];
-                    echo "[Auth] 🔄 DC Migration: switching to DC $newDc\n";
                     
                     $this->client->connect($newDc, true);
                     
-                    echo "[Auth] Retrying sendCode on DC $newDc...\n";
                     return $this->sendCode($phoneNumber);
                 }
             }
             
-            echo "[Auth] ❌ Error: " . $e->getMessage() . "\n";
             throw $e;
         } catch (\Exception $e) {
-            echo "[Auth] ❌ Error: " . $e->getMessage() . "\n";
             throw $e;
         }
     }
@@ -119,9 +105,6 @@ class Auth
         if (!$sender) {
             throw new \RuntimeException('MTProto sender not initialized');
         }
-
-        echo "[Auth] Signing in with phone: $phoneNumber\n";
-        echo "[Auth] Verifying code: $phoneCode\n";
         
         $request = new AuthSignInRequest(
             $phoneNumber,
@@ -142,13 +125,6 @@ class Auth
             $authorization = AuthAuthorization::fromReader($response['reader']);
             
             $this->authorized = true;
-
-            echo "[Auth] ✅ Login successful!\n";
-            echo "[Auth] User ID: {$authorization->user->id}\n";
-            echo "[Auth] Name: " . $authorization->user->getFullName() . "\n";
-            if ($authorization->user->username) {
-                echo "[Auth] Username: @{$authorization->user->username}\n";
-            }
             
             return [
                 'user' => [
@@ -161,7 +137,6 @@ class Auth
                 ]
             ];
         } catch (\Exception $e) {
-            echo "[Auth] ❌ Error signing in: " . $e->getMessage() . "\n";
             throw $e;
         }
     }
@@ -181,15 +156,11 @@ class Auth
         if (!$this->client->isConnected()) {
             throw new \RuntimeException('Not connected to Telegram');
         }
-
-        echo "[Auth] Logging out...\n";
         
         $this->client->getSession()->setAuthKey(null);
         $this->phoneNumber = null;
         $this->phoneCodeHash = null;
         $this->authorized = false;
-        
-        echo "[Auth] Logged out successfully!\n";
         
         return true;
     }

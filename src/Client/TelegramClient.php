@@ -46,7 +46,6 @@ class TelegramClient
         }
         
         if ($isReconnect && $this->connection) {
-            echo "[Client] Disconnecting from current DC...\n";
             $this->connection->close();
         }
         
@@ -56,22 +55,11 @@ class TelegramClient
         
         $this->session->setDC($dcId, $dc['ip'], $dc['port']);
         
-        echo "[Client] Connected to DC $dcId ({$dc['ip']}:{$dc['port']})\n";
-        
         if ($this->session->getAuthKey() === null || $isReconnect) {
-            if ($isReconnect) {
-                echo "[Client] Generating new auth key for DC $dcId...\n";
-            } else {
-                echo "[Client] No auth key found, generating new one...\n";
-            }
-            
             $authenticator = new Authenticator($this->connection);
             $authKey = $authenticator->doAuthentication();
             $this->session->setAuthKey($authKey->getKey());
             $this->timeOffset = $authenticator->getTimeOffset();
-            echo "[Client] Auth key generated and saved!\n";
-        } else {
-            echo "[Client] Using existing auth key\n";
         }
         
         $authKeyObj = new AuthKey($this->session->getAuthKey());
@@ -92,8 +80,6 @@ class TelegramClient
             if (empty($phone)) {
                 throw new \InvalidArgumentException('Phone number required for first login');
             }
-
-            echo "\n[Client] Starting authentication flow...\n";
             
             $sentCode = $this->auth->sendCode($phone);
             
@@ -107,9 +93,6 @@ class TelegramClient
             $user = $this->auth->signIn($phone, $sentCode['phone_code_hash'], $code);
             
             $firstName = $user['user']['first_name'] ?? 'User';
-            echo "[Client] Welcome, {$firstName}!\n";
-        } else {
-            echo "[Client] Already authorized\n";
         }
     }
 
@@ -117,7 +100,6 @@ class TelegramClient
     {
         if ($this->connection && $this->connection->isConnected()) {
             $this->connection->close();
-            echo "[Client] Disconnected from Telegram\n";
         }
     }
 
@@ -140,8 +122,6 @@ class TelegramClient
         if (!$this->auth->isAuthorized()) {
             throw new \RuntimeException('Not authorized');
         }
-        
-        echo "[Client] Sending message to $chatId: $text\n";
     }
 
     public function getMe(): array
@@ -153,8 +133,6 @@ class TelegramClient
         if (!$this->auth->isAuthorized()) {
             throw new \RuntimeException('Not authorized');
         }
-        
-        echo "[Client] Getting current user info...\n";
         
         return [
             'id' => 123456789,

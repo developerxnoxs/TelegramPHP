@@ -79,9 +79,6 @@ class MTProtoSender
                 $errorCode = $result['reader']->readInt();
                 $newServerSalt = $result['reader']->readLong();
                 
-                echo "[MTProto] ⚠️  bad_server_salt received (error $errorCode)\n";
-                echo "[MTProto] Updating salt: " . dechex($this->salt) . " -> " . dechex($newServerSalt) . "\n";
-                
                 $this->salt = $newServerSalt;
                 $attempt++;
                 continue;
@@ -129,7 +126,6 @@ class MTProtoSender
                 $errorCode = $plaintextReader->readInt();
                 $errorMessage = $plaintextReader->readString();
                 
-                echo "[MTProto] RPC Error $errorCode: $errorMessage\n";
                 throw new RPCException($errorCode, $errorMessage);
             }
             
@@ -144,7 +140,6 @@ class MTProtoSender
         
         if ($constructor === 0x73f1f8dc) {
             $containerSize = $plaintextReader->readInt();
-            echo "[MTProto] msg_container with $containerSize messages\n";
             
             for ($i = 0; $i < $containerSize; $i++) {
                 $innerMsgId = $plaintextReader->readLong();
@@ -152,7 +147,6 @@ class MTProtoSender
                 $innerBytes = $plaintextReader->readInt();
                 
                 $innerConstructor = $plaintextReader->readInt();
-                echo "[MTProto] Message $i: constructor=0x" . dechex($innerConstructor) . ", bytes=$innerBytes\n";
                 
                 if ($innerConstructor === 0xf35c6d01) {
                     $reqMsgId = $plaintextReader->readLong();
@@ -172,14 +166,12 @@ class MTProtoSender
                     $uniqueId = $plaintextReader->readLong();
                     $serverSalt = $plaintextReader->readLong();
                     
-                    echo "[MTProto] new_session_created: updating salt to 0x" . dechex($serverSalt) . "\n";
                     $this->salt = $serverSalt;
                 } else {
                     $plaintextReader->read($innerBytes - 4);
                 }
             }
             
-            echo "[MTProto] Container processed, receiving next packet...\n";
             $nextResponse = $this->connection->recv();
             return $this->processResponse($nextResponse);
         }
