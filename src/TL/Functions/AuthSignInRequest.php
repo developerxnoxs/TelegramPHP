@@ -24,11 +24,14 @@ class AuthSignInRequest extends TLObject
     {
         $writer->writeInt(self::CONSTRUCTOR);
         
-        $flags = 0;
+        // Set bit 0 of flags since phone_code is present (flags.0?string in TL schema)
+        $flags = 1;
         $writer->writeInt($flags);
         
         $writer->writeString($this->phoneNumber);
         $writer->writeString($this->phoneCodeHash);
+        
+        // Write phone_code only if flags.0 is set (which we did above)
         $writer->writeString($this->phoneCode);
     }
 
