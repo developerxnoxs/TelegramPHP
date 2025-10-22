@@ -16,15 +16,15 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Telegram Login Test"
+args = "Interactive Login"
 
 [[workflows.workflow]]
-name = "Telegram Login Test"
+name = "Interactive Login"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "php test_login_with_creds.php"
+args = "php interactive_login.php"
 
 [workflows.workflow.metadata]
 outputType = "console"
