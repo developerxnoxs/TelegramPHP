@@ -1,6 +1,6 @@
 <?php
 
-namespace TelethonPHP\TL;
+namespace XnoxsProto\TL;
 
 abstract class TLObject
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace TelethonPHP\TL\Types;
+namespace XnoxsProto\TL\Types;
 
-use TelethonPHP\TL\BinaryReader;
+use XnoxsProto\TL\BinaryReader;
 
 class AuthSentCode
 {

@@ -1,9 +1,9 @@
 <?php
 
-namespace TelethonPHP\TL\Types;
+namespace XnoxsProto\TL\Types;
 
-use TelethonPHP\TL\TLObject;
-use TelethonPHP\TL\BinaryReader;
+use XnoxsProto\TL\TLObject;
+use XnoxsProto\TL\BinaryReader;
 
 class DhGenFail extends TLObject
 {

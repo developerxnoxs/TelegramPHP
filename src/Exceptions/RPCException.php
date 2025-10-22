@@ -1,6 +1,6 @@
 <?php
 
-namespace TelethonPHP\Exceptions;
+namespace XnoxsProto\Exceptions;
 
 class RPCException extends \RuntimeException
 {

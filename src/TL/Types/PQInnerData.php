@@ -1,10 +1,10 @@
 <?php
 
-namespace TelethonPHP\TL\Types;
+namespace XnoxsProto\TL\Types;
 
-use TelethonPHP\TL\TLObject;
-use TelethonPHP\TL\BinaryWriter;
-use TelethonPHP\Helpers\Helpers;
+use XnoxsProto\TL\TLObject;
+use XnoxsProto\TL\BinaryWriter;
+use XnoxsProto\Helpers\Helpers;
 
 class PQInnerData extends TLObject
 {

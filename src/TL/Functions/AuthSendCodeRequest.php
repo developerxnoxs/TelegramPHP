@@ -1,9 +1,9 @@
 <?php
 
-namespace TelethonPHP\TL\Functions;
+namespace XnoxsProto\TL\Functions;
 
-use TelethonPHP\TL\TLObject;
-use TelethonPHP\TL\BinaryWriter;
+use XnoxsProto\TL\TLObject;
+use XnoxsProto\TL\BinaryWriter;
 
 class AuthSendCodeRequest extends TLObject
 {

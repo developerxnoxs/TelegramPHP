@@ -1,6 +1,6 @@
 <?php
 
-namespace TelethonPHP\Helpers;
+namespace XnoxsProto\Helpers;
 
 class Helpers
 {

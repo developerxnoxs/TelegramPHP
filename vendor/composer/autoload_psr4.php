@@ -6,5 +6,5 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'TelethonPHP\\' => array($baseDir . '/src'),
+    'XnoxsProto\\' => array($baseDir . '/src'),
 );

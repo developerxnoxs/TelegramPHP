@@ -1,6 +1,6 @@
 <?php
 
-namespace TelethonPHP\TL;
+namespace XnoxsProto\TL;
 
 class BinaryReader
 {
@@ -99,13 +99,13 @@ class BinaryReader
         $constructorId = $this->readInt();
         
         $typeMap = [
-            0x05162463 => \TelethonPHP\TL\Types\ResPQ::class,
-            0xd0e8075c => \TelethonPHP\TL\Types\ServerDHParamsOk::class,
-            0x79cb045d => \TelethonPHP\TL\Types\ServerDHParamsFail::class,
-            0xb5890dba => \TelethonPHP\TL\Types\ServerDHInnerData::class,
-            0x3bcbf734 => \TelethonPHP\TL\Types\DhGenOk::class,
-            0x46dc1fb9 => \TelethonPHP\TL\Types\DhGenRetry::class,
-            0xa69dae02 => \TelethonPHP\TL\Types\DhGenFail::class,
+            0x05162463 => \XnoxsProto\TL\Types\ResPQ::class,
+            0xd0e8075c => \XnoxsProto\TL\Types\ServerDHParamsOk::class,
+            0x79cb045d => \XnoxsProto\TL\Types\ServerDHParamsFail::class,
+            0xb5890dba => \XnoxsProto\TL\Types\ServerDHInnerData::class,
+            0x3bcbf734 => \XnoxsProto\TL\Types\DhGenOk::class,
+            0x46dc1fb9 => \XnoxsProto\TL\Types\DhGenRetry::class,
+            0xa69dae02 => \XnoxsProto\TL\Types\DhGenFail::class,
         ];
         
         if (!isset($typeMap[$constructorId])) {

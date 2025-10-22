@@ -1,14 +1,14 @@
 <?php
 
-namespace TelethonPHP\Client;
+namespace XnoxsProto\Client;
 
-use TelethonPHP\Sessions\AbstractSession;
-use TelethonPHP\Sessions\MemorySession;
-use TelethonPHP\Network\Connection;
-use TelethonPHP\Network\Authenticator;
-use TelethonPHP\Network\MTProtoSender;
-use TelethonPHP\Crypto\RSA;
-use TelethonPHP\Crypto\AuthKey;
+use XnoxsProto\Sessions\AbstractSession;
+use XnoxsProto\Sessions\MemorySession;
+use XnoxsProto\Network\Connection;
+use XnoxsProto\Network\Authenticator;
+use XnoxsProto\Network\MTProtoSender;
+use XnoxsProto\Crypto\RSA;
+use XnoxsProto\Crypto\AuthKey;
 
 class TelegramClient
 {

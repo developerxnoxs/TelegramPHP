@@ -1,8 +1,8 @@
 <?php
 
-namespace TelethonPHP\TL\Functions;
+namespace XnoxsProto\TL\Functions;
 
-use TelethonPHP\TL\TLObject;
+use XnoxsProto\TL\TLObject;
 
 class ReqDHParamsRequest extends TLObject
 {

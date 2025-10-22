@@ -1,11 +1,11 @@
 {
-    "name": "custom/telethon-php",
-    "description": "PHP implementation of Telegram MTProto protocol inspired by Telethon",
+    "name": "xnoxs/xnoxsproto",
+    "description": "PHP implementation of Telegram MTProto protocol",
     "type": "library",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "TelethonPHP\\": "src/"
+            "XnoxsProto\\": "src/"
         }
     },
     "require": {

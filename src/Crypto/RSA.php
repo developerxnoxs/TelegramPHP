@@ -1,8 +1,8 @@
 <?php
 
-namespace TelethonPHP\Crypto;
+namespace XnoxsProto\Crypto;
 
-use TelethonPHP\TL\TLObject;
+use XnoxsProto\TL\TLObject;
 
 class RSA
 {

@@ -7,14 +7,14 @@ namespace Composer\Autoload;
 class ComposerStaticInit283d27d12625d1c35d158e765a972f77
 {
     public static $prefixLengthsPsr4 = array (
-        'T' => 
+        'X' => 
         array (
-            'TelethonPHP\\' => 12,
+            'XnoxsProto\\' => 11,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'TelethonPHP\\' => 
+        'XnoxsProto\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),

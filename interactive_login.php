@@ -2,12 +2,12 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use TelethonPHP\Client\TelegramClient;
-use TelethonPHP\Sessions\FileSession;
+use XnoxsProto\Client\TelegramClient;
+use XnoxsProto\Sessions\FileSession;
 
 echo "\n";
 echo "╔════════════════════════════════════════════════════════════════╗\n";
-echo "║        TelethonPHP - Interactive Telegram Login               ║\n";
+echo "║         XnoxsProto - Interactive Telegram Login               ║\n";
 echo "╚════════════════════════════════════════════════════════════════╝\n";
 echo "\n";
 

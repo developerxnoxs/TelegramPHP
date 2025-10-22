@@ -1,13 +1,13 @@
 <?php
 
-namespace TelethonPHP\Network;
+namespace XnoxsProto\Network;
 
-use TelethonPHP\Crypto\AES;
-use TelethonPHP\Crypto\AuthKey;
-use TelethonPHP\TL\BinaryWriter;
-use TelethonPHP\TL\BinaryReader;
-use TelethonPHP\Helpers\Helpers;
-use TelethonPHP\Exceptions\RPCException;
+use XnoxsProto\Crypto\AES;
+use XnoxsProto\Crypto\AuthKey;
+use XnoxsProto\TL\BinaryWriter;
+use XnoxsProto\TL\BinaryReader;
+use XnoxsProto\Helpers\Helpers;
+use XnoxsProto\Exceptions\RPCException;
 
 class MTProtoSender
 {

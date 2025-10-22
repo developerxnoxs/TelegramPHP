@@ -1,14 +1,14 @@
 <?php
 
-namespace TelethonPHP\Client;
+namespace XnoxsProto\Client;
 
-use TelethonPHP\TL\Functions\AuthSendCodeRequest;
-use TelethonPHP\TL\Functions\AuthSignInRequest;
-use TelethonPHP\TL\Functions\InvokeWithLayerRequest;
-use TelethonPHP\TL\Functions\InitConnectionRequest;
-use TelethonPHP\TL\Types\AuthSentCode;
-use TelethonPHP\TL\Types\AuthAuthorization;
-use TelethonPHP\TL\BinaryReader;
+use XnoxsProto\TL\Functions\AuthSendCodeRequest;
+use XnoxsProto\TL\Functions\AuthSignInRequest;
+use XnoxsProto\TL\Functions\InvokeWithLayerRequest;
+use XnoxsProto\TL\Functions\InitConnectionRequest;
+use XnoxsProto\TL\Types\AuthSentCode;
+use XnoxsProto\TL\Types\AuthAuthorization;
+use XnoxsProto\TL\BinaryReader;
 
 class Auth
 {
@@ -46,7 +46,7 @@ class Auth
                 214,
                 new InitConnectionRequest(
                     $this->client->getApiId(),
-                    'TelethonPHP',
+                    'XnoxsProto',
                     php_uname('s') . ' ' . php_uname('r'),
                     '1.0.0',
                     'en',
@@ -78,7 +78,7 @@ class Auth
                 'phone_code_hash' => $sentCode->phoneCodeHash,
                 'type' => $sentCode->type
             ];
-        } catch (\TelethonPHP\Exceptions\RPCException $e) {
+        } catch (\XnoxsProto\Exceptions\RPCException $e) {
             if ($e->errorCode === 303) {
                 if (preg_match('/(PHONE|USER|NETWORK)_MIGRATE_(\d+)/', $e->errorMessage, $matches)) {
                     $newDc = (int)$matches[2];

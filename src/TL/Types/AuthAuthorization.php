@@ -1,9 +1,9 @@
 <?php
 
-namespace TelethonPHP\TL\Types;
+namespace XnoxsProto\TL\Types;
 
-use TelethonPHP\TL\BinaryReader;
-use TelethonPHP\TL\Types\User;
+use XnoxsProto\TL\BinaryReader;
+use XnoxsProto\TL\Types\User;
 
 class AuthAuthorization
 {

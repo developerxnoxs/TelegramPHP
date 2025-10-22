@@ -1,6 +1,6 @@
 <?php
 
-namespace TelethonPHP\Sessions;
+namespace XnoxsProto\Sessions;
 
 class FileSession extends AbstractSession
 {

@@ -1,10 +1,10 @@
-# TelethonPHP - MTProto Library for PHP
+# XnoxsProto - MTProto Library for PHP
 
 ## Project Overview
 
 **Status**: ✅ PRODUCTION READY - REAL LOGIN WORKING 100%
 
-A PHP implementation of Telegram's MTProto protocol, architecturally inspired by Telethon (Python). This library **ACTUALLY COMMUNICATES** with real Telegram servers using the MTProto protocol.
+A PHP implementation of Telegram's MTProto protocol. This library **ACTUALLY COMMUNICATES** with real Telegram servers using the MTProto protocol.
 
 ### Proof of Real Implementation
 
@@ -238,8 +238,8 @@ To add more functionality:
 ```php
 require_once 'vendor/autoload.php';
 
-use TelethonPHP\Client\TelegramClient;
-use TelethonPHP\Sessions\FileSession;
+use XnoxsProto\Client\TelegramClient;
+use XnoxsProto\Sessions\FileSession;
 
 // Get API credentials from https://my.telegram.org/apps
 $apiId = YOUR_API_ID;
@@ -303,7 +303,6 @@ This is a reference implementation. Check Telegram's API terms for production us
 ## References
 
 - Telegram MTProto: https://core.telegram.org/mtproto
-- Telethon (Python): https://github.com/LonamiWebs/Telethon
 - MTProto Authentication: https://core.telegram.org/mtproto/auth_key
 
 ---
@@ -311,3 +310,4 @@ This is a reference implementation. Check Telegram's API terms for production us
 **Last Updated**: 2025-10-22
 **Status**: ✅ PRODUCTION READY - Real login working with DC auto-migration
 **Test Result**: ✅ Successfully sends verification codes and completes login flow
+**Library**: XnoxsProto - Professional PHP MTProto Implementation

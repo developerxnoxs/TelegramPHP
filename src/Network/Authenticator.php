@@ -1,24 +1,24 @@
 <?php
 
-namespace TelethonPHP\Network;
+namespace XnoxsProto\Network;
 
-use TelethonPHP\Crypto\RSA;
-use TelethonPHP\Crypto\AES;
-use TelethonPHP\Crypto\AuthKey;
-use TelethonPHP\Helpers\Helpers;
-use TelethonPHP\TL\BinaryReader;
-use TelethonPHP\TL\Types\ResPQ;
-use TelethonPHP\TL\Types\PQInnerData;
-use TelethonPHP\TL\Types\ServerDHParamsOk;
-use TelethonPHP\TL\Types\ServerDHParamsFail;
-use TelethonPHP\TL\Types\ServerDHInnerData;
-use TelethonPHP\TL\Types\ClientDHInnerData;
-use TelethonPHP\TL\Types\DhGenOk;
-use TelethonPHP\TL\Types\DhGenRetry;
-use TelethonPHP\TL\Types\DhGenFail;
-use TelethonPHP\TL\Functions\ReqPqMultiRequest;
-use TelethonPHP\TL\Functions\ReqDHParamsRequest;
-use TelethonPHP\TL\Functions\SetClientDHParamsRequest;
+use XnoxsProto\Crypto\RSA;
+use XnoxsProto\Crypto\AES;
+use XnoxsProto\Crypto\AuthKey;
+use XnoxsProto\Helpers\Helpers;
+use XnoxsProto\TL\BinaryReader;
+use XnoxsProto\TL\Types\ResPQ;
+use XnoxsProto\TL\Types\PQInnerData;
+use XnoxsProto\TL\Types\ServerDHParamsOk;
+use XnoxsProto\TL\Types\ServerDHParamsFail;
+use XnoxsProto\TL\Types\ServerDHInnerData;
+use XnoxsProto\TL\Types\ClientDHInnerData;
+use XnoxsProto\TL\Types\DhGenOk;
+use XnoxsProto\TL\Types\DhGenRetry;
+use XnoxsProto\TL\Types\DhGenFail;
+use XnoxsProto\TL\Functions\ReqPqMultiRequest;
+use XnoxsProto\TL\Functions\ReqDHParamsRequest;
+use XnoxsProto\TL\Functions\SetClientDHParamsRequest;
 
 class Authenticator
 {

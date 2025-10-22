@@ -1,8 +1,8 @@
 <?php
 
-namespace TelethonPHP\Network;
+namespace XnoxsProto\Network;
 
-use TelethonPHP\Helpers\Helpers;
+use XnoxsProto\Helpers\Helpers;
 
 class MTProtoPlainSender
 {

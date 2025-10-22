@@ -1,6 +1,6 @@
 <?php
 
-namespace TelethonPHP\Network;
+namespace XnoxsProto\Network;
 
 class TcpAbridged
 {
